@@ -38,6 +38,5 @@ export class UpdatePostDto {
   @IsOptional()
   featuredImageUrl?: string;
 
-  @IsString()
   author: string;
 }

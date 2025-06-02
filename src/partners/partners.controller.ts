@@ -16,7 +16,7 @@ export class PartnersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Partner|null> {
+  findOne(@Param('id') id: number): Promise<Partner|null> {
     return this.partnersService.findOne(id);
   }
 
@@ -27,7 +27,7 @@ export class PartnersController {
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePartnerDto: UpdatePartnerDto,
   ): Promise<Partner|null> {
     return this.partnersService.update(id, updatePartnerDto);

@@ -30,7 +30,7 @@ export class PartnersService {
     };
   }
 
-  findOne(id: string): Promise<Partner|null> {
+  findOne(id: number): Promise<Partner|null> {
     return this.partnersRepository.findOne({ 
       where: { id }
     });
@@ -41,7 +41,7 @@ export class PartnersService {
     return this.partnersRepository.save(partner);
   }
 
-  async update(id: string, updatePartnerDto: UpdatePartnerDto): Promise<Partner|null> {
+  async update(id: number, updatePartnerDto: UpdatePartnerDto): Promise<Partner|null> {
     await this.partnersRepository.update(id, updatePartnerDto);
     return this.findOne(id);
   }
