@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProjectsService } from './projects.service';
 import { Project } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -9,8 +21,12 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto): Promise<Project> {
-    return this.projectsService.create(createProjectDto);
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @Body() createProjectDto: CreateProjectDto,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<Project> {
+    return this.projectsService.create(createProjectDto, image);
   }
 
   @Get()
@@ -19,20 +35,22 @@ export class ProjectsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Project> {
-    return this.projectsService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Project> {
+    return this.projectsService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProjectDto: UpdateProjectDto,
+    @UploadedFile() image?: Express.Multer.File,
   ): Promise<Project> {
-    return this.projectsService.update(+id, updateProjectDto);
+    return this.projectsService.update(id, updateProjectDto, image);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.projectsService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.projectsService.remove(id);
   }
 }

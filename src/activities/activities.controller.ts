@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ActivitiesService } from './activities.service';
 import { Activity } from './entities/activity.entity';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -9,8 +21,12 @@ export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Post()
-  create(@Body() createActivityDto: CreateActivityDto): Promise<Activity> {
-    return this.activitiesService.create(createActivityDto);
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @Body() createActivityDto: CreateActivityDto,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<Activity> {
+    return this.activitiesService.create(createActivityDto, image);
   }
 
   @Get()
@@ -19,20 +35,22 @@ export class ActivitiesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Activity> {
-    return this.activitiesService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Activity> {
+    return this.activitiesService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateActivityDto: UpdateActivityDto,
+    @UploadedFile() image?: Express.Multer.File,
   ): Promise<Activity> {
-    return this.activitiesService.update(+id, updateActivityDto);
+    return this.activitiesService.update(id, updateActivityDto, image);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.activitiesService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.activitiesService.remove(id);
   }
 }

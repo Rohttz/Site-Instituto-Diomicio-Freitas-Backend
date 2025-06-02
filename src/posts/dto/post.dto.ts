@@ -1,42 +1,70 @@
-import { IsString, IsBoolean, IsOptional, IsUrl, Length } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
-  @Length(3, 100)
+  @IsNotEmpty()
   title: string;
 
   @IsString()
-  content: string;
-
-  @IsBoolean()
-  @IsOptional()
-  published?: boolean;
-
-  @IsUrl()
-  @IsOptional()
-  featuredImageUrl?: string;
+  @IsNotEmpty()
+  slug: string;
 
   @IsString()
+  @IsNotEmpty()
+  excerpt: string;
+
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+
+  @IsString()
+  @IsNotEmpty()
   author: string;
+
+  @IsString()
+  @IsOptional()
+  authorImage?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  tags: string[];
 }
 
 export class UpdatePostDto {
   @IsString()
-  @Length(3, 100)
   @IsOptional()
   title?: string;
 
   @IsString()
   @IsOptional()
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
+  excerpt?: string;
+
+  @IsString()
+  @IsOptional()
   content?: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  published?: boolean;
+  author?: string;
 
-  @IsUrl()
+  @IsString()
   @IsOptional()
-  featuredImageUrl?: string;
+  authorImage?: string;
 
-  author: string;
+  @IsString()
+  @IsOptional()
+  category?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 }

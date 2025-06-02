@@ -1,28 +1,37 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ length: 100 })
+  @Column()
   title: string;
+
+  @Column({ unique: true })
+  slug: string;
+
+  @Column({ type: 'text' })
+  excerpt: string;
 
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ default: false })
-  published: boolean; // title, content, published(true/false), featuredImageUrl, author.
+  @Column()
+  image: string;
+
+  @Column()
+  author: string;
 
   @Column({ nullable: true })
-  featuredImageUrl: string;
+  authorImage?: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  date: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Column()
+  category: string;
 
-  @Column({ length: 100 })
-  author: string;
+  @Column('simple-array')
+  tags: string[];
 }

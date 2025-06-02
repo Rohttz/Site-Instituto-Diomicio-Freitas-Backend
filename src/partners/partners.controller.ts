@@ -1,40 +1,54 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PartnersService } from './partners.service';
-import { Partner } from './entities/partner.entity';
 import { CreatePartnerDto, UpdatePartnerDto } from './dto/partner.dto';
 
 @Controller('partners')
 export class PartnersController {
   constructor(private readonly partnersService: PartnersService) {}
 
+  @Post()
+  @UseInterceptors(FileInterceptor('logo'))
+  create(
+    @Body() createPartnerDto: CreatePartnerDto,
+    @UploadedFile() logo: Express.Multer.File,
+  ) {
+    return this.partnersService.create(createPartnerDto, logo);
+  }
+
   @Get()
-  findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ): Promise<{ data: Partner[]; total: number; page: number; limit: number }> {
-    return this.partnersService.findAllPaginated(page, limit);
+  findAll() {
+    return this.partnersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<Partner|null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.partnersService.findOne(id);
   }
 
-  @Post()
-  create(@Body() createPartnerDto: CreatePartnerDto): Promise<Partner> {
-    return this.partnersService.create(createPartnerDto);
-  }
-
-  @Put(':id')
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('logo'))
   update(
-    @Param('id') id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePartnerDto: UpdatePartnerDto,
-  ): Promise<Partner|null> {
-    return this.partnersService.update(id, updatePartnerDto);
+    @UploadedFile() logo?: Express.Multer.File,
+  ) {
+    return this.partnersService.update(id, updatePartnerDto, logo);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.partnersService.remove(id);
   }
 } 

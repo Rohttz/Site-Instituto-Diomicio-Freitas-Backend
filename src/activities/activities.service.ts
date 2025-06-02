@@ -1,53 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Activity } from './entities/activity.entity';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
-import { NotFoundException } from '@nestjs/common';
+import { S3Service } from '../common/services/s3.service';
 
 @Injectable()
 export class ActivitiesService {
   constructor(
     @InjectRepository(Activity)
-    private activitiesRepository: Repository<Activity>,
+    private readonly activityRepository: Repository<Activity>,
+    private readonly s3Service: S3Service,
   ) {}
 
-  async create(createActivityDto: CreateActivityDto): Promise<Activity> {
-    const activity = this.activitiesRepository.create(createActivityDto);
-    return this.activitiesRepository.save(activity);
+  async create(createActivityDto: CreateActivityDto, image: Express.Multer.File): Promise<Activity> {
+    const imageUrl = await this.s3Service.uploadFile(image, 'activities');
+    
+    const activity = this.activityRepository.create({
+      ...createActivityDto,
+      image: imageUrl,
+    });
+
+    return this.activityRepository.save(activity);
   }
 
   async findAll(): Promise<Activity[]> {
-    return this.activitiesRepository.find();
+    return this.activityRepository.find();
   }
 
-  async findOne(id: number): Promise<Activity> {
-    const activity = await this.activitiesRepository.findOneBy({ id });
+  async findOne(id: string): Promise<Activity> {
+    const activity = await this.activityRepository.findOne({ where: { id } });
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${id} not found`);
     }
     return activity;
   }
 
-  async update(id: number, updateActivityDto: UpdateActivityDto): Promise<Activity> {
-    // 1. Verifica se a atividade existe
-    const existing = await this.activitiesRepository.findOneBy({ id });
-    if (!existing) {
-      throw new NotFoundException(`Activity with ID ${id} not found`);
+  async update(id: string, updateActivityDto: UpdateActivityDto, image?: Express.Multer.File): Promise<Activity> {
+    const activity = await this.findOne(id);
+    
+    let imageUrl = activity.image;
+    if (image) {
+      // Delete old image
+      await this.s3Service.deleteFile(activity.image);
+      // Upload new image
+      imageUrl = await this.s3Service.uploadFile(image, 'activities');
     }
-  
-    // 2. Atualiza a entidade (abordagem mais segura)
-    const updated = await this.activitiesRepository.save({
-      ...existing,
-      ...updateActivityDto
-    });
-  
-    // 3. Retorna a entidade atualizada
-    return updated;
+
+    Object.assign(activity, updateActivityDto, { image: imageUrl });
+    return this.activityRepository.save(activity);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.activitiesRepository.delete(id);
+  async remove(id: string): Promise<void> {
+    const activity = await this.findOne(id);
+    await this.s3Service.deleteFile(activity.image);
+    await this.activityRepository.remove(activity);
   }
 }

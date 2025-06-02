@@ -1,40 +1,64 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PostsService } from './posts.service';
-import { Post as PostEntity } from './entities/post.entity';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @Post()
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return this.postsService.create(createPostDto, image);
+  }
+
   @Get()
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<{ data: PostEntity[]; total: number; page: number; limit: number }> {
-    return this.postsService.findAllPaginated(page, limit);
+    @Query('category') category?: string,
+  ) {
+    return this.postsService.findAll(page, limit, category);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<PostEntity|null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.findOne(id);
   }
 
-  @Post()
-  create(@Body() createPostDto: CreatePostDto): Promise<PostEntity> {
-    return this.postsService.create(createPostDto);
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.postsService.findBySlug(slug);
   }
 
-  @Put(':id')
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
   update(
-    @Param('id') id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<PostEntity|null> {
-    return this.postsService.update(id, updatePostDto);
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.postsService.update(id, updatePostDto, image);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.remove(id);
   }
 }

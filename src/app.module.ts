@@ -1,29 +1,40 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { PartnersModule } from './partners/partners.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { ProjectsModule } from './projects/projects.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
+import { ContactModule } from './contact/contact.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'site-api',
-      synchronize: true, // apenas para desenvolvimento
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        synchronize: true, // apenas para desenvolvimento
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      }),
+      inject: [ConfigService],
     }),
     PostsModule,
     PartnersModule,
     ActivitiesModule,
     ProjectsModule,
+    ContactModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
