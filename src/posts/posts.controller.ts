@@ -16,7 +16,7 @@ export class PostsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<PostEntity|null> {
+  findOne(@Param('id') id: number): Promise<PostEntity|null> {
     return this.postsService.findOne(id);
   }
 
@@ -27,14 +27,14 @@ export class PostsController {
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<PostEntity|null> {
     return this.postsService.update(id, updatePostDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id') id: number): Promise<void> {
     return this.postsService.remove(id);
   }
 }

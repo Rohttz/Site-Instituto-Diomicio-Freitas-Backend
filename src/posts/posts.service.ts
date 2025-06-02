@@ -30,7 +30,7 @@ export class PostsService {
     };
   }
 
-  findOne(id: string): Promise<Post|null> {
+  findOne(id: number): Promise<Post|null> {
     return this.postsRepository.findOne({ 
       where: { id }
     });
@@ -41,12 +41,12 @@ export class PostsService {
     return this.postsRepository.save(post);
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post|null> {
+  async update(id: number, updatePostDto: UpdatePostDto): Promise<Post|null> {
     await this.postsRepository.update(id, updatePostDto);
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.postsRepository.delete(id);
   }
 }

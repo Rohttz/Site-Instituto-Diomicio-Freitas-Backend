@@ -3,13 +3,16 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { PartnersModule } from './partners/partners.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { ProjectsModule } from './projects/projects.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'db',
+      host: 'localhost',
       port: 5432,
       username: 'postgres',
       password: 'postgres',
@@ -19,6 +22,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     PostsModule,
     PartnersModule,
+    ActivitiesModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,8 +2,8 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 
 @Entity()
 export class Post {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ length: 100 })
   title: string;
@@ -12,7 +12,7 @@ export class Post {
   content: string;
 
   @Column({ default: false })
-  published: boolean;
+  published: boolean; // title, content, published(true/false), featuredImageUrl, author.
 
   @Column({ nullable: true })
   featuredImageUrl: string;

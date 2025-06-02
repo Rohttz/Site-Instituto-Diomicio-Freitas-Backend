@@ -2,13 +2,13 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 
 @Entity()
 export class Partner {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ length: 100 })
   name: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text' }) 
   description: string;
 
   @Column({ default: false })
