@@ -10,13 +10,15 @@ export class S3Service {
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
-      region: this.configService.get('AWS_REGION'),
+      region: 'auto',
+      endpoint: `https://${this.configService.get('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
+        accessKeyId: this.configService.get('R2_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get('R2_SECRET_ACCESS_KEY'),
       },
+      forcePathStyle: true,
     });
-    this.bucketName = this.configService.get('S3_BUCKET_NAME');
+    this.bucketName = this.configService.get('R2_BUCKET_NAME');
   }
 
   async uploadFile(file: Express.Multer.File, folder: string = ''): Promise<string> {
@@ -28,15 +30,29 @@ export class S3Service {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read',
     });
 
     await this.s3Client.send(command);
-    return `https://${this.bucketName}.s3.amazonaws.com/${fileName}`;
+    
+    const customDomain = this.configService.get('R2_CUSTOM_DOMAIN');
+    if (customDomain) {
+      return `https://${customDomain}/${fileName}`;
+    }
+    
+    return `https://${this.configService.get('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com/${this.bucketName}/${fileName}`;
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
-    const fileName = fileUrl.split('/').pop();
+    let fileName: string;
+    
+    if (fileUrl.includes('.r2.cloudflarestorage.com')) {
+      const urlParts = fileUrl.split('/');
+      fileName = urlParts.slice(4).join('/');
+    } else {
+      const urlParts = fileUrl.split('/');
+      fileName = urlParts.slice(3).join('/');
+    }
+    
     if (!fileName) return;
 
     const command = new DeleteObjectCommand({
