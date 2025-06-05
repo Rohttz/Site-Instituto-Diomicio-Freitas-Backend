@@ -23,6 +23,7 @@ DB_USERNAME=seu_usuario
 DB_PASSWORD=sua_senha
 DB_NAME=nome_do_banco
 PORT=3000
+CORS_ORIGIN=http://localhost:3000
 ```
 
 ### Executar
@@ -376,7 +377,7 @@ curl -X DELETE http://localhost:3000/history/uuid-do-historico
 2. **Upload de Arquivos**: Endpoints com upload usam `multipart/form-data`
 3. **Validação**: Todos os endpoints validam os dados de entrada
 4. **Paginação**: Posts suportam paginação via query parameters
-5. **CORS**: Configure CORS conforme necessário para produção
+5. **CORS**: Configurado através da variável de ambiente `CORS_ORIGIN`. Por padrão aceita requisições de `http://localhost:3000`. Para produção, configure com a URL do seu frontend (ex: `https://meusite.com`)
 
 ## 🔍 Testando a API
 
