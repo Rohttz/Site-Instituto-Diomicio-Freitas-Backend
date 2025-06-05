@@ -10,6 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
+      - .:/usr/src/app
     networks:
       - easy-order-network-dev
   # NestJS Application (Development)

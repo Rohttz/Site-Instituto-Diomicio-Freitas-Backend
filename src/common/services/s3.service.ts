@@ -9,19 +9,34 @@ export class S3Service {
   private bucketName: string;
 
   constructor(private configService: ConfigService) {
+    const accessKeyId = this.configService.get('R2_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get('R2_SECRET_ACCESS_KEY');
+    const bucketName = this.configService.get('R2_BUCKET_NAME');
+    const endpoint = this.configService.get('R2_ENDPOINT');
+
+    if (!accessKeyId || !secretAccessKey || !bucketName || !endpoint) {
+      throw new Error('Configuração R2 incompleta. Verifique as variáveis de ambiente.');
+    }
+
     this.s3Client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${this.configService.get('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
+      region: 'auto', // Cloudflare R2 usa 'auto' como região
+      endpoint: endpoint,
       credentials: {
-        accessKeyId: this.configService.get('R2_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get('R2_SECRET_ACCESS_KEY'),
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey,
       },
       forcePathStyle: true,
     });
-    this.bucketName = this.configService.get('R2_BUCKET_NAME');
+    
+    this.bucketName = bucketName;
   }
 
   async uploadFile(file: Express.Multer.File, folder: string = ''): Promise<string> {
+    
+    if (!file) {
+      throw new Error('Nenhum arquivo fornecido para upload');
+    }
+
     const fileExtension = file.originalname.split('.').pop();
     const fileName = `${folder}${folder ? '/' : ''}${uuidv4()}.${fileExtension}`;
 
@@ -30,21 +45,42 @@ export class S3Service {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
+      Metadata: {
+        originalName: file.originalname,
+        uploadDate: new Date().toISOString(),
+      },
     });
 
-    await this.s3Client.send(command);
-    
-    const customDomain = this.configService.get('R2_CUSTOM_DOMAIN');
+    try {
+      await this.s3Client.send(command);
+
+      // Gerar URL pública
+      const publicUrl = this.generatePublicUrl(fileName);
+      
+      return publicUrl;
+    } catch (error) {
+      throw new Error(`Falha no upload para R2: ${error.message}`);
+    }
+  }
+
+  private generatePublicUrl(fileName: string): string {
+    const customDomain = this.configService.get('R2_PUBLIC_URL');
     if (customDomain) {
-      return `https://${customDomain}/${fileName}`;
+      return `${customDomain}/${fileName}`;
     }
     
-    return `https://${this.configService.get('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com/${this.bucketName}/${fileName}`;
+    const endpoint = this.configService.get('R2_ENDPOINT');
+    return `${endpoint}/${this.bucketName}/${fileName}`;
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
+    if (!fileUrl) {
+      return;
+    }
+
     let fileName: string;
     
+    // Extrair o nome do arquivo da URL
     if (fileUrl.includes('.r2.cloudflarestorage.com')) {
       const urlParts = fileUrl.split('/');
       fileName = urlParts.slice(4).join('/');
@@ -53,13 +89,19 @@ export class S3Service {
       fileName = urlParts.slice(3).join('/');
     }
     
-    if (!fileName) return;
+    if (!fileName) {
+      return;
+    }
 
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
       Key: fileName,
     });
 
-    await this.s3Client.send(command);
+    try {
+      await this.s3Client.send(command);
+    } catch (error) {
+      console.error('Erro ao excluir arquivo do R2:', error);
+    }
   }
 } 

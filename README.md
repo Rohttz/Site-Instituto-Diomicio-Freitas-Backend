@@ -17,13 +17,23 @@ npm install
 ### Variáveis de Ambiente
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 ```bash
+# Configuração do Banco de Dados
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=seu_usuario
 DB_PASSWORD=sua_senha
 DB_NAME=nome_do_banco
+
+# Configuração do Servidor
 PORT=3000
 CORS_ORIGIN=http://localhost:3000
+
+# Configuração do Cloudflare R2
+R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=your-access-key-id
+R2_SECRET_ACCESS_KEY=your-secret-access-key
+R2_BUCKET_NAME=your-bucket-name
+R2_PUBLIC_URL=https://your-custom-domain.com (opcional - para domínio customizado)
 ```
 
 ### Executar
@@ -57,12 +67,92 @@ Para configurar o Cloudflare R2 em sua aplicação, adicione as seguintes variá
 
 ```bash
 # Cloudflare R2 Configuration
-CLOUDFLARE_R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
-CLOUDFLARE_R2_ACCESS_KEY_ID=your-access-key
-CLOUDFLARE_R2_SECRET_ACCESS_KEY=your-secret-key
-CLOUDFLARE_R2_BUCKET_NAME=your-bucket-name
-CLOUDFLARE_R2_PUBLIC_URL=https://your-custom-domain.com
+R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=your-access-key-id
+R2_SECRET_ACCESS_KEY=your-secret-access-key
+R2_BUCKET_NAME=your-bucket-name
+R2_PUBLIC_URL=https://your-custom-domain.com
 ```
+
+### ⚠️ Solução de Problemas - R2 Upload
+
+Se os arquivos não estão aparecendo no Cloudflare R2, verifique:
+
+#### 1. **Configuração das Variáveis de Ambiente**
+Certifique-se de que todas as variáveis R2 estão definidas corretamente:
+
+```bash
+# Verifique se estas variáveis estão no seu .env:
+R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=your-access-key-id
+R2_SECRET_ACCESS_KEY=your-secret-access-key
+R2_BUCKET_NAME=your-bucket-name
+```
+
+#### 2. **Como Obter as Credenciais R2**
+
+No painel da Cloudflare:
+1. Vá para **R2 Object Storage**
+2. Clique em **Manage R2 API tokens**
+3. Crie um novo token com permissões de **Object Read and Write**
+4. Anote o **Access Key ID** e **Secret Access Key**
+5. O **Account ID** está no canto direito do painel
+
+#### 3. **Verificação do Bucket**
+- Certifique-se de que o bucket existe no R2
+- Verifique se o nome do bucket está correto (case-sensitive)
+- Confirme que o bucket tem as permissões adequadas
+
+#### 4. **Logs de Debug**
+Quando a aplicação iniciar, você verá logs como:
+```
+🔧 Configurando cliente R2...
+Endpoint: https://your-account-id.r2.cloudflarestorage.com
+Bucket: your-bucket-name
+```
+
+Durante o upload:
+```
+📤 Iniciando upload para R2...
+Arquivo: image.jpg
+Tamanho: 125456
+Tipo: image/jpeg
+📡 Enviando arquivo para R2...
+✅ Upload concluído com sucesso!
+🔗 URL pública gerada: https://...
+```
+
+#### 5. **Erros Comuns**
+
+**Erro 403 (Forbidden):**
+- Credenciais incorretas
+- Bucket não existe
+- Permissões insuficientes no token
+
+**Erro 404 (Not Found):**
+- Endpoint incorreto
+- Account ID incorreto
+
+**Erro de Timeout:**
+- Problema de conectividade
+- Arquivo muito grande
+
+#### 6. **Teste Manual**
+Para testar o upload:
+
+```bash
+curl -X POST http://localhost:3000/posts \
+  -F "title=Teste Upload" \
+  -F "slug=teste-upload" \
+  -F "excerpt=Teste" \
+  -F "content=Conteúdo de teste" \
+  -F "author=Teste" \
+  -F "category=Teste" \
+  -F 'tags=["teste"]' \
+  -F "image=@caminho/para/sua/imagem.jpg"
+```
+
+Verifique os logs no console da aplicação para ver se há erros.
 
 ### Como Funciona
 
@@ -106,7 +196,7 @@ O processo interno será:
 
 ---
 
-## �� Endpoints da API
+## 🎯 Endpoints da API
 
 ### 🏠 Geral
 
