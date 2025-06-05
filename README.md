@@ -37,7 +37,76 @@ npm run start:prod
 
 A API estará disponível em: `http://localhost:3000`
 
-## 📚 Endpoints da API
+## 🗂️ Armazenamento de Arquivos - Cloudflare R2
+
+Esta API utiliza o **Cloudflare R2** como solução de armazenamento de objetos para upload e gerenciamento de arquivos (imagens, documentos, etc.).
+
+### O que é o Cloudflare R2?
+
+O **Cloudflare R2** é um serviço de armazenamento de objetos compatível com S3, oferecido pela Cloudflare. Principais características:
+
+- **Sem taxas de saída**: Não há cobrança para transferência de dados
+- **Compatível com S3**: Utiliza as mesmas APIs do Amazon S3
+- **Performance global**: Distribuído pela rede global da Cloudflare
+- **Custo-benefício**: Preços competitivos para armazenamento
+- **Integração simples**: Fácil integração com aplicações existentes
+
+### Configuração do R2
+
+Para configurar o Cloudflare R2 em sua aplicação, adicione as seguintes variáveis ao seu arquivo `.env`:
+
+```bash
+# Cloudflare R2 Configuration
+CLOUDFLARE_R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+CLOUDFLARE_R2_ACCESS_KEY_ID=your-access-key
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=your-secret-key
+CLOUDFLARE_R2_BUCKET_NAME=your-bucket-name
+CLOUDFLARE_R2_PUBLIC_URL=https://your-custom-domain.com
+```
+
+### Como Funciona
+
+1. **Upload de Arquivos**: Quando você faz upload de uma imagem através dos endpoints da API (posts, projetos, atividades, parceiros), o arquivo é automaticamente enviado para o bucket R2
+2. **Processamento**: O arquivo é processado, validado e armazenado com um nome único
+3. **URL Pública**: A API retorna uma URL pública para acessar o arquivo
+4. **CDN Global**: Os arquivos são servidos através da rede global da Cloudflare para máxima performance
+
+### Vantagens do R2 para esta API
+
+- **Economia**: Sem taxas de saída de dados, ideal para sites com muitas imagens
+- **Performance**: Entrega rápida de imagens através da CDN da Cloudflare
+- **Escalabilidade**: Suporta crescimento ilimitado de arquivos
+- **Confiabilidade**: Alta disponibilidade e durabilidade dos dados
+- **Segurança**: Controle de acesso e criptografia integrados
+
+### Tipos de Arquivos Suportados
+
+- **Imagens**: JPEG, PNG, GIF, WebP
+- **Documentos**: PDF, DOC, DOCX
+- **Outros**: Conforme configuração da aplicação
+
+### Exemplo de Uso
+
+Quando você faz upload de uma imagem para um post:
+
+```bash
+curl -X POST http://localhost:3000/posts \
+  -F "title=Meu Post" \
+  -F "content=Conteúdo do post" \
+  -F "image=@minha-imagem.jpg"
+```
+
+O processo interno será:
+1. Arquivo recebido pela API
+2. Validação do tipo e tamanho
+3. Upload para o Cloudflare R2
+4. Geração de URL pública
+5. Salvamento da URL no banco de dados
+6. Retorno da resposta com a URL da imagem
+
+---
+
+## �� Endpoints da API
 
 ### 🏠 Geral
 
