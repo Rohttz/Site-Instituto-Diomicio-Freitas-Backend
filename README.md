@@ -1,6 +1,6 @@
 # Site API - Documentação dos Endpoints
 
-Uma API desenvolvida em NestJS para gerenciar posts, projetos, atividades, parceiros, histórico e contatos de um site.
+Uma API desenvolvida em NestJS para gerenciar posts, projetos, atividades, parceiros, histórico e contatos de um site, com sistema completo de autenticação JWT.
 
 ## 🚀 Configuração
 
@@ -27,6 +27,10 @@ DB_NAME=nome_do_banco
 # Configuração do Servidor
 PORT=3000
 CORS_ORIGIN=http://localhost:3000
+
+# Configuração JWT
+JWT_SECRET=sua-chave-secreta-muito-longa-e-segura-aqui
+JWT_EXPIRES_IN=7d
 
 # Configuração do Cloudflare R2
 R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
@@ -196,6 +200,162 @@ O processo interno será:
 
 ---
 
+## 🔐 Sistema de Autenticação JWT
+
+Esta API implementa um sistema completo de autenticação usando JWT (JSON Web Tokens). 
+
+### 🛡️ Proteção de Rotas
+
+**Por padrão, todas as rotas estão protegidas** e requerem um token JWT válido no header `Authorization`. 
+
+**Rotas Públicas (sem autenticação):**
+- `GET /` - Página inicial
+- `POST /contacts` - Formulário de contato
+- `GET /posts` - Listagem de posts
+- `GET /posts/:id` - Detalhes do post
+- `GET /posts/slug/:slug` - Post por slug
+- `GET /partners` - Listagem de parceiros
+- `GET /partners/:id` - Detalhes do parceiro
+- `GET /activities` - Listagem de atividades
+- `GET /activities/:id` - Detalhes da atividade
+- `GET /projects` - Listagem de projetos
+- `GET /projects/:id` - Detalhes do projeto
+- `GET /history` - Listagem de histórico
+- `GET /history/:id` - Detalhes do histórico
+- `POST /auth/register` - Registro de usuário
+- `POST /auth/login` - Login de usuário
+
+**Rotas Protegidas (requerem JWT):**
+- Todas as rotas de criação, edição e exclusão (POST, PATCH, DELETE)
+- `GET /auth/profile` - Perfil do usuário
+- `GET /contacts` - Listagem de contatos
+- `DELETE /contacts/:id` - Exclusão de contatos
+
+### 🔑 Como Usar a Autenticação
+
+1. **Registre um usuário** ou **faça login**
+2. **Use o token retornado** no header `Authorization: Bearer <token>`
+3. **Acesse rotas protegidas** com o token
+
+```bash
+# Exemplo de requisição autenticada
+curl -X POST http://localhost:3000/posts \
+  -H "Authorization: Bearer seu-jwt-token-aqui" \
+  -F "title=Meu Post" \
+  -F "content=Conteúdo do post"
+```
+
+---
+
+## 🔐 Autenticação (`/auth`)
+
+### POST /auth/register
+**Descrição:** Registrar um novo usuário  
+**Acesso:** Público
+
+**Corpo da requisição:**
+```json
+{
+  "email": "usuario@exemplo.com",
+  "name": "Nome do Usuário",
+  "password": "senha123456"
+}
+```
+
+**Resposta:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "usuario@exemplo.com",
+    "name": "Nome do Usuário",
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "access_token": "jwt-token-aqui"
+}
+```
+
+**Exemplo:**
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@exemplo.com",
+    "name": "Nome do Usuário",
+    "password": "senha123456"
+  }'
+```
+
+### POST /auth/login
+**Descrição:** Autenticar um usuário existente  
+**Acesso:** Público
+
+**Corpo da requisição:**
+```json
+{
+  "email": "usuario@exemplo.com",
+  "password": "senha123456"
+}
+```
+
+**Resposta:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "usuario@exemplo.com",
+    "name": "Nome do Usuário",
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "access_token": "jwt-token-aqui"
+}
+```
+
+**Exemplo:**
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@exemplo.com",
+    "password": "senha123456"
+  }'
+```
+
+### GET /auth/profile
+**Descrição:** Obter perfil do usuário autenticado  
+**Acesso:** Protegido (requer JWT)
+
+**Headers:**
+```
+Authorization: Bearer jwt-token-aqui
+```
+
+**Resposta:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "usuario@exemplo.com",
+    "name": "Nome do Usuário",
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+**Exemplo:**
+```bash
+curl -X GET http://localhost:3000/auth/profile \
+  -H "Authorization: Bearer jwt-token-aqui"
+```
+
+---
+
 ## 🎯 Endpoints da API
 
 ### 🏠 Geral
@@ -214,6 +374,7 @@ curl -X GET http://localhost:3000/
 
 ### POST /contacts
 **Descrição:** Criar um novo contato  
+**Acesso:** Público
 
 **Corpo da requisição:**
 ```json
@@ -239,23 +400,29 @@ curl -X POST http://localhost:3000/contacts \
 
 ### GET /contacts
 **Descrição:** Listar todos os contatos  
+**Acesso:** Protegido (requer JWT)
 
 ```bash
-curl -X GET http://localhost:3000/contacts
+curl -X GET http://localhost:3000/contacts \
+  -H "Authorization: Bearer jwt-token-aqui"
 ```
 
 ### GET /contacts/:id
 **Descrição:** Buscar contato por ID  
+**Acesso:** Protegido (requer JWT)
 
 ```bash
-curl -X GET http://localhost:3000/contacts/uuid-do-contato
+curl -X GET http://localhost:3000/contacts/uuid-do-contato \
+  -H "Authorization: Bearer jwt-token-aqui"
 ```
 
 ### DELETE /contacts/:id
 **Descrição:** Deletar contato por ID  
+**Acesso:** Protegido (requer JWT)
 
 ```bash
-curl -X DELETE http://localhost:3000/contacts/uuid-do-contato
+curl -X DELETE http://localhost:3000/contacts/uuid-do-contato \
+  -H "Authorization: Bearer jwt-token-aqui"
 ```
 
 ---
@@ -264,6 +431,7 @@ curl -X DELETE http://localhost:3000/contacts/uuid-do-contato
 
 ### POST /posts
 **Descrição:** Criar um novo post com upload de imagem  
+**Acesso:** Protegido (requer JWT)
 
 **Corpo da requisição (multipart/form-data):**
 - `title`: Título do post
@@ -279,6 +447,7 @@ curl -X DELETE http://localhost:3000/contacts/uuid-do-contato
 **Exemplo:**
 ```bash
 curl -X POST http://localhost:3000/posts \
+  -H "Authorization: Bearer jwt-token-aqui" \
   -F "title=Meu Primeiro Post" \
   -F "slug=meu-primeiro-post" \
   -F "excerpt=Este é um resumo do post" \
@@ -291,6 +460,7 @@ curl -X POST http://localhost:3000/posts \
 
 ### GET /posts
 **Descrição:** Listar posts com paginação e filtros  
+**Acesso:** Público
 
 **Query parameters:**
 - `page` (opcional): Número da página (padrão: 1)
@@ -310,6 +480,7 @@ curl -X GET "http://localhost:3000/posts?category=Tecnologia"
 
 ### GET /posts/:id
 **Descrição:** Buscar post por ID  
+**Acesso:** Público
 
 ```bash
 curl -X GET http://localhost:3000/posts/uuid-do-post
@@ -317,6 +488,7 @@ curl -X GET http://localhost:3000/posts/uuid-do-post
 
 ### GET /posts/slug/:slug
 **Descrição:** Buscar post por slug  
+**Acesso:** Público
 
 ```bash
 curl -X GET http://localhost:3000/posts/slug/meu-primeiro-post
@@ -324,18 +496,22 @@ curl -X GET http://localhost:3000/posts/slug/meu-primeiro-post
 
 ### PATCH /posts/:id
 **Descrição:** Atualizar post  
+**Acesso:** Protegido (requer JWT)
 
 ```bash
 curl -X PATCH http://localhost:3000/posts/uuid-do-post \
+  -H "Authorization: Bearer jwt-token-aqui" \
   -F "title=Título Atualizado" \
   -F "content=Novo conteúdo..."
 ```
 
 ### DELETE /posts/:id
 **Descrição:** Deletar post  
+**Acesso:** Protegido (requer JWT)
 
 ```bash
-curl -X DELETE http://localhost:3000/posts/uuid-do-post
+curl -X DELETE http://localhost:3000/posts/uuid-do-post \
+  -H "Authorization: Bearer jwt-token-aqui"
 ```
 
 ---

@@ -15,6 +15,7 @@ import { ActivitiesService } from './activities.service';
 import { Activity } from './entities/activity.entity';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -29,11 +30,13 @@ export class ActivitiesController {
     return this.activitiesService.create(createActivityDto, image);
   }
 
+  @Public()
   @Get()
   findAll(): Promise<Activity[]> {
     return this.activitiesService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Activity> {
     return this.activitiesService.findOne(id);

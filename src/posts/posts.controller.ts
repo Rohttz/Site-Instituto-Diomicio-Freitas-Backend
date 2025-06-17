@@ -14,6 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -28,6 +29,7 @@ export class PostsController {
     return this.postsService.create(createPostDto, image);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query('page') page: number = 1,
@@ -37,11 +39,13 @@ export class PostsController {
     return this.postsService.findAll(page, limit, category);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.findOne(id);
   }
 
+  @Public()
   @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.postsService.findBySlug(slug);

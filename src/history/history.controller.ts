@@ -11,6 +11,7 @@ import {
 import { HistoryService } from './history.service';
 import { CreateHistoryDto } from './dto/create-history.dto';
 import { UpdateHistoryDto } from './dto/update-history.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('history')
 export class HistoryController {
@@ -21,11 +22,13 @@ export class HistoryController {
     return this.historyService.create(createHistoryDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.historyService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.historyService.findOne(id);

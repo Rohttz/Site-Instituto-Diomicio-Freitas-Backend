@@ -13,6 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PartnersService } from './partners.service';
 import { CreatePartnerDto, UpdatePartnerDto } from './dto/partner.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('partners')
 export class PartnersController {
@@ -27,11 +28,13 @@ export class PartnersController {
     return this.partnersService.create(createPartnerDto, logo);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.partnersService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.partnersService.findOne(id);

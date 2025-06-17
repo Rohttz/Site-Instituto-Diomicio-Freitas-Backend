@@ -1,0 +1,1034 @@
+{
+	"info": {
+		"_postman_id": "c1f7a7d5-6a9c-4f9e-8d8a-0c2f1d9e3b4a",
+		"name": "Site API",
+		"description": "Coleção de endpoints para a Site API, desenvolvida em NestJS.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"Test User\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra um novo usuário."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Realiza o login e salva o token JWT na variável de coleção `jwt_token`."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Retorna o perfil do usuário autenticado."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para autenticação de usuários."
+		},
+		{
+			"name": "Posts",
+			"item": [
+				{
+					"name": "Create Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Meu Post de Teste",
+									"type": "text"
+								},
+								{
+									"key": "slug",
+									"value": "meu-post-de-teste",
+									"type": "text"
+								},
+								{
+									"key": "excerpt",
+									"value": "Este é um resumo.",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Este é o conteúdo completo do post.",
+									"type": "text"
+								},
+								{
+									"key": "author",
+									"value": "Autor Teste",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "Testes",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "[\"teste\", \"postman\"]",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Cria um novo post. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lista todos os posts com paginação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/uuid-do-post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"uuid-do-post"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post by Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/slug/meu-post-de-teste",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"slug",
+								"meu-post-de-teste"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Título Atualizado",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts/uuid-do-post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"uuid-do-post"
+							]
+						},
+						"description": "Atualiza um post. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/uuid-do-post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"uuid-do-post"
+							]
+						},
+						"description": "Deleta um post. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Contacts",
+			"item": [
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"João da Silva\",\n  \"phone\": \"(11) 98765-4321\",\n  \"subject\": \"Dúvidas\",\n  \"message\": \"Gostaria de saber mais sobre o projeto.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/contacts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts"
+							]
+						},
+						"description": "Envia uma nova mensagem de contato."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contacts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts"
+							]
+						},
+						"description": "Lista todas as mensagens de contato. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contacts/uuid-do-contato",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts",
+								"uuid-do-contato"
+							]
+						},
+						"description": "Deleta uma mensagem de contato. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "Create Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Nome do Projeto",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Descrição do projeto.",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects"
+							]
+						},
+						"description": "Cria um novo projeto. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Projects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects"
+							]
+						},
+						"description": "Lista todos os projetos."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Project by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/projects/uuid-do-projeto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"uuid-do-projeto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Nome do Projeto Atualizado",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects/uuid-do-projeto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"uuid-do-projeto"
+							]
+						},
+						"description": "Atualiza um projeto. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/projects/uuid-do-projeto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"uuid-do-projeto"
+							]
+						},
+						"description": "Deleta um projeto. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "Create Activity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Título da Atividade",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Descrição da atividade.",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/activities",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities"
+							]
+						},
+						"description": "Cria uma nova atividade. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activities",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities"
+							]
+						},
+						"description": "Lista todas as atividades."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activities/uuid-da-atividade",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities",
+								"uuid-da-atividade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Activity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Título da Atividade Atualizado",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/activities/uuid-da-atividade",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities",
+								"uuid-da-atividade"
+							]
+						},
+						"description": "Atualiza uma atividade. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Activity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/activities/uuid-da-atividade",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"activities",
+								"uuid-da-atividade"
+							]
+						},
+						"description": "Deleta uma atividade. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Partners",
+			"item": [
+				{
+					"name": "Create Partner",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Nome do Parceiro",
+									"type": "text"
+								},
+								{
+									"key": "logo",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners"
+							]
+						},
+						"description": "Cria um novo parceiro. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Partners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners"
+							]
+						},
+						"description": "Lista todos os parceiros."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Partner by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners/uuid-do-parceiro",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"uuid-do-parceiro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Partner",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Nome do Parceiro Atualizado",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners/uuid-do-parceiro",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"uuid-do-parceiro"
+							]
+						},
+						"description": "Atualiza um parceiro. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Partner",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners/uuid-do-parceiro",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"uuid-do-parceiro"
+							]
+						},
+						"description": "Deleta um parceiro. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "History",
+			"item": [
+				{
+					"name": "Create History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Marco na História\",\n  \"description\": \"Descrição do marco histórico.\",\n  \"date\": \"2025-01-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"history"
+							]
+						},
+						"description": "Cria um novo marco histórico. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"history"
+							]
+						},
+						"description": "Lista todos os marcos históricos."
+					},
+					"response": []
+				},
+				{
+					"name": "Get History by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/history/uuid-do-historico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"history",
+								"uuid-do-historico"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Título do Marco Atualizado\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/history/uuid-do-historico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"history",
+								"uuid-do-historico"
+							]
+						},
+						"description": "Atualiza um marco histórico. Requer autenticação."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/history/uuid-do-historico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"history",
+								"uuid-do-historico"
+							]
+						},
+						"description": "Deleta um marco histórico. Requer autenticação."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "jwt_token",
+			"value": ""
+		}
+	]
+} 

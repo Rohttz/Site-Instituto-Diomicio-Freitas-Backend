@@ -15,6 +15,7 @@ import { ProjectsService } from './projects.service';
 import { Project } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('projects')
 export class ProjectsController {
@@ -29,11 +30,13 @@ export class ProjectsController {
     return this.projectsService.create(createProjectDto, image);
   }
 
+  @Public()
   @Get()
   findAll(): Promise<Project[]> {
     return this.projectsService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Project> {
     return this.projectsService.findOne(id);
